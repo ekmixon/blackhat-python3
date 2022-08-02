@@ -15,7 +15,7 @@ web_paths = queue.Queue()
 
 for r, d, f in os.walk("."):
     for files in f:
-        remote_path = "%s/%s" % (r, files)
+        remote_path = f"{r}/{files}"
         if remote_path.startswith("."):
             remote_path = remote_path[1:]
         if os.path.splitext(files)[1] not in filters:
@@ -25,15 +25,14 @@ for r, d, f in os.walk("."):
 def test_remote():
     while not web_paths.empty():
         path = web_paths.get()
-        url = "%s%s" % (target, path)
+        url = f"{target}{path}"
         request = urllib.request.Request(url)
         try:
             response = urllib.request.urlopen(request)
             print("[%d] => %s" % (response.code, path))
             response.close()
         except urllib.error.HTTPError as error:
-            print("Failed %s" % error.code)
-            pass
+            print(f"Failed {error.code}")
 
 
 for i in range(threads):

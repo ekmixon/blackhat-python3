@@ -74,11 +74,7 @@ class ICMP(Structure):
 
 
 # create a raw socket and bind it to the public interface
-if os.name == "nt":
-    socket_protocol = socket.IPPROTO_IP
-else:
-    socket_protocol = socket.IPPROTO_ICMP
-
+socket_protocol = socket.IPPROTO_IP if os.name == "nt" else socket.IPPROTO_ICMP
 sniffer = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket_protocol)
 
 sniffer.bind((host, 0))
@@ -104,11 +100,10 @@ try:
         # create an IP header from the first 20 bytes of the buffer
         ip_header = IP(raw_buffer[:20])
 
-        print("Protocol: %s %s -> %s" % (
-            ip_header.protocol,
-            ip_header.src_address,
-            ip_header.dst_address)
-              )
+        print(
+            f"Protocol: {ip_header.protocol} {ip_header.src_address} -> {ip_header.dst_address}"
+        )
+
 
         # if it's ICMP we want it
         if ip_header.protocol == "ICMP":
@@ -126,19 +121,16 @@ try:
                   )
 
             # now check for the TYPE 3 and CODE 3 which indicates
-            # a host is up but no port available to talk to           
-            if icmp_header.code == 3 and icmp_header.type == 3:
+            # a host is up but no port available to talk to
+            if (
+                icmp_header.code == 3
+                and icmp_header.type == 3
+                and ip_address(ip_header.src_address) in ip_network(tgt_subnet)
+                and raw_buffer[len(raw_buffer) - len(tgt_message) :]
+                == tgt_message
+            ):
+                print(f"Host Up: {ip_header.src_address}")
 
-                # check to make sure we are receiving the response 
-                # that lands in our subnet
-                if ip_address(ip_header.src_address) in ip_network(tgt_subnet):
-
-                    # test for our magic message
-                    if raw_buffer[len(raw_buffer)
-                       - len(tgt_message):] == tgt_message:
-                        print("Host Up: %s" % ip_header.src_address)
-
-# handle CTRL-C
 except KeyboardInterrupt:
     # if we're on Windows turn off promiscuous mode
     if os.name == "nt":

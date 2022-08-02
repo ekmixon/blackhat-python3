@@ -43,11 +43,7 @@ class IP(Structure):
 
 
 # create a raw socket and bind it to the public interface
-if os.name == "nt":
-    socket_protocol = socket.IPPROTO_IP
-else:
-    socket_protocol = socket.IPPROTO_ICMP
-
+socket_protocol = socket.IPPROTO_IP if os.name == "nt" else socket.IPPROTO_ICMP
 sniffer = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket_protocol)
 
 sniffer.bind((host, 0))
@@ -68,11 +64,10 @@ try:
         # create an IP header from the first 20 bytes of the buffer
         ip_header = IP(raw_buffer[:20])
 
-        print("Protocol: %s %s -> %s" % (
-            ip_header.protocol,
-            ip_header.src_address,
-            ip_header.dst_address)
-              )
+        print(
+            f"Protocol: {ip_header.protocol} {ip_header.src_address} -> {ip_header.dst_address}"
+        )
+
 
 except KeyboardInterrupt:
     # if we're on Windows turn off promiscuous mode

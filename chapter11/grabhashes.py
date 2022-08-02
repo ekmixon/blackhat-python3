@@ -15,7 +15,7 @@ config = conf.ConfObject()
 
 config.parse_options()
 config.PROFILE = "WinXPSP2x86"
-config.LOCATION = "file://%s" % memory_file
+config.LOCATION = f"file://{memory_file}"
 
 registry.register_global_options(config, commands.Command)
 registry.register_global_options(config, addrspace.BaseAddressSpace)
@@ -30,12 +30,10 @@ for offset in registry.all_offsets:
 
     if registry.all_offsets[offset].endswith("\\SAM"):
         sam_offset = offset
-        print("[*] SAM: 0x%08x" % offset)
-
+        print("[*] SAM: 0x%08x" % sam_offset)
     if registry.all_offsets[offset].endswith("\\system"):
         sys_offset = offset
-        print("[*] System: 0x%08x" % offset)
-
+        print("[*] System: 0x%08x" % sys_offset)
     if sam_offset is not None and sys_offset is not None:
         config.sys_offset = sys_offset
         config.sam_offset = sam_offset

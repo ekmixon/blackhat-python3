@@ -23,12 +23,11 @@ def get_process_privileges(pid):
             win32security.TokenPrivileges)
 
         # iterate over privileges and output the ones that are enabled
-        priv_list = []
-        for priv_id, priv_flags in privs:
-            # check if the privilege is enabled
-            if priv_flags == 3:
-                priv_list.append(
-                    win32security.LookupPrivilegeName(None, priv_id))
+        priv_list = [
+            win32security.LookupPrivilegeName(None, priv_id)
+            for priv_id, priv_flags in privs
+            if priv_flags == 3
+        ]
 
     except:
         priv_list.append("N/A")
@@ -37,9 +36,8 @@ def get_process_privileges(pid):
 
 
 def log_to_file(message):
-    fd = open(LOG_FILE, "ab")
-    fd.write("%s\r\n" % message)
-    fd.close()
+    with open(LOG_FILE, "ab") as fd:
+        fd.write("%s\r\n" % message)
     return
 
 
@@ -66,9 +64,8 @@ while True:
 
         privileges = get_process_privileges(pid)
 
-        process_log_message = "%s,%s,%s,%s,%s,%s,%s" % (
-            create_date, proc_owner, executable, cmdline, pid, parent_pid,
-            privileges)
+        process_log_message = f"{create_date},{proc_owner},{executable},{cmdline},{pid},{parent_pid},{privileges}"
+
 
         print("%s\r\n" % process_log_message)
 

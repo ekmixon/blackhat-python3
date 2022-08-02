@@ -33,7 +33,7 @@ try:
     print("[+] Listening for connection...")
     client, addr = sock.accept()
 except Exception as e:
-    print("[-] Listen failed: " + str(e))
+    print(f"[-] Listen failed: {str(e)}")
     sys.exit(1)
 
 print("[+] Got a connection!")
@@ -65,7 +65,7 @@ try:
         except KeyboardInterrupt:
             bhSession.close()
         except Exception as e:
-            print("[-] Caught exception: " + str(e))
+            print(f"[-] Caught exception: {str(e)}")
             bhSession.close()
 finally:
     sys.exit(1)

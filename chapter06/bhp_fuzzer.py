@@ -70,16 +70,14 @@ class BHPFuzzer(IIntruderPayloadGenerator):
         if picker == 1:
             payload += "'"
 
-            # jam an XSS attempt in
-        if picker == 2:
+        elif picker == 2:
             payload += "<script>alert('BHP!');</script>"
 
-            # repeat a chunk of the original payload a random number
-        if picker == 3:
+        elif picker == 3:
             chunk_length = random.randint(len(payload[offset:]),
                                           len(payload) - 1)
             repeater = random.randint(1, 10)
-            for i in range(repeater):
+            for _ in range(repeater):
                 payload += original_payload[offset:offset + chunk_length]
 
         # add the remaining bits of the payload

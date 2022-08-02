@@ -32,11 +32,11 @@ def receive_from(connection):
         # keep reading into the buffer until there's no more data or we
         # time-out
         while True:
-            data = connection.recv(4096)
-            if not data:
-                break
-            buffer += data
+            if data := connection.recv(4096):
+                buffer += data
 
+            else:
+                break
     except TimeoutError:
         pass
 
@@ -164,11 +164,7 @@ def main():
     # before sending to the remote host
     receive_first = sys.argv[5]
 
-    if "True" in receive_first:
-        receive_first = True
-    else:
-        receive_first = False
-
+    receive_first = "True" in receive_first
     # now spin up our listening socket
     server_loop(local_host, local_port, remote_host, remote_port, receive_first)
 

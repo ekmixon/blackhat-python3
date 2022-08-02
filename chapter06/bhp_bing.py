@@ -40,16 +40,13 @@ class BurpExtender(IBurpExtender, IContextMenuFactory):
         for traffic in http_traffic:
             http_service = traffic.getHttpService()
             host = http_service.getHost()
-            print("User selected host: %s" % host)
+            print(f"User selected host: {host}")
             self.bing_search(host)
         return
 
     def bing_search(self, host):
 
-        # check if we have an IP or hostname
-        is_ip = re.match(r'[0-9]+(?:\.[0-9]+){3}', host)
-
-        if is_ip:
+        if is_ip := re.match(r'[0-9]+(?:\.[0-9]+){3}', host):
             ip_address = host
             domain = False
         else:
@@ -65,7 +62,7 @@ class BurpExtender(IBurpExtender, IContextMenuFactory):
 
     def bing_query(self, bing_query_string):
 
-        print("Performing Bing search: %s" % bing_query_string)
+        print(f"Performing Bing search: {bing_query_string}")
 
         # encode our query
         quoted_query = urllib.parse.quote(bing_query_string)
@@ -74,7 +71,9 @@ class BurpExtender(IBurpExtender, IContextMenuFactory):
         http_request += "Host: api.datamarket.azure.com\r\n"
         http_request += "Connection: close\r\n"
         http_request += "Authorization: Basic %s\r\n" % base64.b64encode(
-            ":%s" % bing_api_key)
+            f":{bing_api_key}"
+        )
+
         http_request += "User-Agent: Blackhat Python\r\n\r\n"
 
         json_body = self._callbacks.makeHttpRequest("api.datamarket.azure.com",
@@ -98,5 +97,4 @@ class BurpExtender(IBurpExtender, IContextMenuFactory):
                         self._callbacks.includeInScope(j_url)
         except:
             print("No results from Bing")
-            pass
         return

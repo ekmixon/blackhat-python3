@@ -19,7 +19,7 @@ def face_detect(path, file_name):
     # highlight the faces in the image
     for x1, y1, x2, y2 in rects:
         cv2.rectangle(img, (x1, y1), (x2, y2), (127, 255, 0), 2)
-    cv2.imwrite("%s/%s-%s" % (faces_directory, pcap_file, file_name), img)
+    cv2.imwrite(f"{faces_directory}/{pcap_file}-{file_name}", img)
     return True
 
 
@@ -32,9 +32,7 @@ def get_http_headers(http_payload):
             re.findall(r"(?P<name>.*?): (?P<value>.*?)\r\n", headers_raw))
     except:
         return None
-    if "Content-Type" not in headers:
-        return None
-    return headers
+    return None if "Content-Type" not in headers else headers
 
 
 def extract_image(headers, http_payload):
@@ -87,14 +85,12 @@ def http_assembler(pcap_fl):
             # store the image
             file_name = "%s-pic_carver_%d.%s" % (
                 pcap_fl, carved_images, image_type)
-            fd = open("%s/%s" % (pictures_directory, file_name), "wb")
-            fd.write(image)
-            fd.close()
+            with open(f"{pictures_directory}/{file_name}", "wb") as fd:
+                fd.write(image)
             carved_images += 1
             # now attempt face detection
             try:
-                result = face_detect("%s/%s" % (pictures_directory, file_name),
-                                     file_name)
+                result = face_detect(f"{pictures_directory}/{file_name}", file_name)
                 if result is True:
                     faces_detected += 1
             except:

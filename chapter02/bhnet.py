@@ -44,19 +44,15 @@ def client_handler(client_socket):
 
         # keep reading data until none is available
         while True:
-            data = client_socket.recv(1024)
-
-            if not data:
-                break
-            else:
+            if data := client_socket.recv(1024):
                 file_buffer += data
 
+            else:
+                break
         # now we take these bytes and try to write them out
         try:
-            file_descriptor = open(upload_destination, "wb")
-            file_descriptor.write(file_buffer.encode('utf-8'))
-            file_descriptor.close()
-
+            with open(upload_destination, "wb") as file_descriptor:
+                file_descriptor.write(file_buffer.encode('utf-8'))
             # acknowledge that we wrote the file out
             client_socket.send(
                 "Successfully saved file to %s\r\n" % upload_destination)
@@ -215,7 +211,7 @@ def main():
                 assert False, "Unhandled Option"
 
     except getopt.GetoptError as err:
-        print(str(err))
+        print(err)
         usage()
 
     # are we going to listen or just send data from STDIN?

@@ -43,10 +43,10 @@ class Bruter(object):
         self.username = user
         self.password_q = words_q
         self.found = False
-        print("Finished setting up for: %s" % user)
+        print(f"Finished setting up for: {user}")
 
     def run_bruteforce(self):
-        for i in range(user_thread):
+        for _ in range(user_thread):
             t = threading.Thread(target=self.web_bruter)
             t.start()
 
@@ -83,30 +83,23 @@ class Bruter(object):
                 self.found = True
 
                 print("[*] Bruteforce successful.")
-                print("[*] Username: %s" % username)
-                print("[*] Password: %s" % brute)
+                print(f"[*] Username: {username}")
+                print(f"[*] Password: {brute}")
                 print("[*] Waiting for other threads to exit...")
 
 
 def build_wordlist(wordlst_file):
-    # read in the word list
-    fd = open(wordlst_file, "r")
-    raw_words = [line.rstrip('\n') for line in fd]
-    fd.close()
-
+    with open(wordlst_file, "r") as fd:
+        raw_words = [line.rstrip('\n') for line in fd]
     found_resume = False
     word_queue = queue.Queue()
 
     for word in raw_words:
         word = word.rstrip()
-        if resume is not None:
-            if found_resume:
-                word_queue.put(word)
-            else:
-                if word == resume:
-                    found_resume = True
-                    print("Resuming wordlist from: %s" % resume)
-        else:
+        if resume is not None and not found_resume and word == resume:
+            found_resume = True
+            print(f"Resuming wordlist from: {resume}")
+        elif resume is None or found_resume:
             word_queue.put(word)
     return word_queue
 

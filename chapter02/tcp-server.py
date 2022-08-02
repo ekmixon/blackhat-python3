@@ -18,7 +18,7 @@ def handle_client(client_socket):
     # just print out what the client sends
     request = client_socket.recv(1024)
 
-    print("[*] Received: %s" % request)
+    print(f"[*] Received: {request}")
 
     # send back a packet
     client_socket.send(b"ACK!")

